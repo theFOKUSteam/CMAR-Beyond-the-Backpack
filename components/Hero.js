@@ -5,7 +5,7 @@ export default function Hero() {
       <div className="hero-inner">
         <div className="container">
           <div className="hero-topline">
-            <img src="/images/logo.svg" alt="Central Mississippi Association of Realtists seal" width={64} height={64} />
+            <img src="/images/logo.png" alt="Central Mississippi Association of Realtists seal" width={64} height={64} />
             <span className="brand-text">CMAR Community Event · Jackson, MS</span>
           </div>
 
@@ -79,15 +79,15 @@ export default function Hero() {
               <div className="hero-collage">
                 <div className="collage-card tall">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/gallery-1.svg" alt="Illustration representing free haircuts and styling at the event" />
+                  <img src="/images/gallery-1.jpg" alt="A young boy smiling while getting a fresh haircut from a barber" />
                 </div>
                 <div className="collage-card">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/gallery-3.svg" alt="Illustration representing backpacks and school supplies" />
+                  <img src="/images/gallery-3.jpg" alt="A backpack filled with school supplies, notebooks, and pencils" />
                 </div>
                 <div className="collage-card">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/images/gallery-4.svg" alt="Illustration representing community and celebration" />
+                  <img src="/images/gallery-4.jpg" alt="A CMAR volunteer helping a young girl pick out a backpack at the event" />
                 </div>
               </div>
               <div className="free-badge">
