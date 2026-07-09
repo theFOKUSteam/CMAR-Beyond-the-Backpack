@@ -124,6 +124,8 @@ To enable it:
      school text,
      registration_type text,
      hair_service text,
+     appointment_slot text,
+     ack_late_policy boolean,
      backpack_requested boolean,
      special_notes text,
      photo_release text,
@@ -145,25 +147,45 @@ To enable it:
 
 ---
 
-## 6. Replacing the Mockup Images with Real Event Photos
+## 6. Replacing the Images
 
-Every image in `public/images/` is currently an elegant illustrated
-placeholder (not a real photo) so the site is ready to launch immediately —
-and so nobody's likeness is used without permission. Swapping in real,
-licensed event photography takes two steps:
+`public/images/` currently contains real photos: `gallery-1.jpg` (haircut,
+tall/portrait), `gallery-3.jpg` (backpack & supplies, square), `gallery-4.jpg`
+(community volunteer moment, square), and `logo.png` (the official CMAR seal).
+To swap any of them out later:
 
-1. Add your final images to `public/images/`. Recommended files/sizes:
-   - `gallery-1.jpg` — a tall photo (e.g. a stylist with a child), ~800×1000px
-   - `gallery-3.jpg` — a square photo (e.g. backpacks/supplies), ~800×800px
-   - `gallery-4.jpg` — a square photo (e.g. community/smiling kids), ~800×800px
-   - `logo.png` — your official CMAR logo, if you'd like to replace the
-     recreated seal in `logo.svg`
-2. In `components/Hero.js`, update the three `src="/images/gallery-*.svg"`
-   attributes to point at your new filenames (e.g. `/images/gallery-1.jpg`),
-   and update the matching `alt` text to describe the real photo.
+1. Add your new image to `public/images/`, matching the same shape as the
+   file it's replacing:
+   - `gallery-1.jpg` — tall/portrait, ~800×1000px
+   - `gallery-3.jpg` and `gallery-4.jpg` — square, ~800×800px
+   - `logo.png` — square, ~500×500px, ideally transparent or white background
+2. Keep the same filename (easiest — no code changes needed), or if you use
+   a new filename, update the matching `src="/images/..."` in
+   `components/Hero.js` and its `alt` text to describe the new photo.
 
-No other code changes are required — Next.js will automatically serve the
-new files.
+No other code changes are required — Next.js automatically serves whatever's
+in `public/images/`.
+
+---
+
+## 6.5 Appointment Time Slots
+
+Families who select a hair service now also pick a specific appointment time:
+
+- **Haircuts** are scheduled in **45-minute** slots (10:00, 10:45, 11:30, 12:15).
+- **Silk Press, Natural Updo, Kids Ponytail, and Kids Braided Styles** are
+  scheduled in **60-minute** slots (10:00, 11:00, 12:00), since styling
+  takes longer.
+- Each slot holds **10 families by default** — change the `SLOT_CAPACITY`
+  constant at the top of `lib/slots.js` to adjust this for every slot at once.
+
+**Live remaining-spot counts require Supabase** (see section 5 above). Without
+it, the site still shows the slot times, but can't display or enforce a
+"X spots left" count, since there's nowhere to persistently track who
+booked what. With Supabase connected, the form:
+- Shows real-time remaining capacity per slot (fetched from `/api/slots`)
+- Rejects a submission server-side if a slot filled up between when the
+  page loaded and when the family submitted (prevents overbooking)
 
 ---
 

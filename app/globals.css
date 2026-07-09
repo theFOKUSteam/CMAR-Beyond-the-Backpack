@@ -715,6 +715,69 @@ textarea:focus {
   margin-top: 8px;
 }
 
+.late-policy-box {
+  margin-top: 18px;
+  background: rgba(31, 58, 95, 0.05);
+  border: 1px solid rgba(31, 58, 95, 0.18);
+  border-radius: 14px;
+  padding: 16px 18px;
+}
+.late-policy-box p {
+  margin: 0;
+  font-size: 13.5px;
+  color: #33403b;
+  line-height: 1.55;
+}
+.late-policy-box .consent-item {
+  background: #fff;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.slot {
+  position: relative;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  padding: 13px 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  background: #fcfbf8;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  display: block;
+}
+.slot input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.slot .cap {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #7a887f;
+  margin-top: 3px;
+}
+.slot.selected {
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+}
+.slot.selected .cap {
+  color: var(--gold-light);
+}
+.slot.full {
+  background: #f1efe9;
+  border-color: #e2ddcf;
+  color: #a6a196;
+  cursor: not-allowed;
+}
+
 .consent-list {
   display: grid;
   gap: 16px;
@@ -957,6 +1020,9 @@ footer .org-tagline {
   }
   .hair-options {
     grid-template-columns: 1fr;
+  }
+  .slots {
+    grid-template-columns: repeat(2, 1fr);
   }
   .form-shell,
   .confirm-shell {

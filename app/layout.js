@@ -21,7 +21,7 @@ export const metadata = {
       "A free community event hosted by CMAR: haircuts, hair styling, backpacks, and school supplies. Saturday, August 1, 2026 in Jackson, MS.",
     url: siteUrl,
     siteName: "Beyond the Backpack",
-    images: [{ url: "/images/gallery-1.svg", width: 400, height: 400 }],
+    images: [{ url: "/images/gallery-4.jpg", width: 800, height: 800 }],
     locale: "en_US",
     type: "website"
   },

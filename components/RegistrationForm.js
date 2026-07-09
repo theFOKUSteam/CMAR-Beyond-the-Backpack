@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const HAIR_SERVICES = ["Haircut", "Silk Press", "Natural Updo", "Kids Ponytail Style", "Kids Braided Style"];
 
@@ -20,6 +20,7 @@ const initialState = {
   school: "",
   registrationType: "",
   hairService: "",
+  appointmentSlot: "",
   specialNotes: "",
   consentParent: false,
   consentLiability: false,
@@ -28,6 +29,7 @@ const initialState = {
   ackAccompanied: false,
   ackWhileSuppliesLast: false,
   ackAccurate: false,
+  ackLatePolicy: false,
   photoRelease: ""
 };
 
@@ -37,6 +39,8 @@ export default function RegistrationForm() {
   const [status, setStatus] = useState("idle"); // idle | submitting | success | error
   const [serverError, setServerError] = useState("");
   const [confirmation, setConfirmation] = useState(null);
+  const [slots, setSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   const needsHairService = form.registrationType === "hair_and_backpack" || form.registrationType === "hair_only";
   const wantsBackpack = form.registrationType === "hair_and_backpack" || form.registrationType === "backpack_only";
@@ -44,6 +48,34 @@ export default function RegistrationForm() {
   function update(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
+
+  // Whenever the chosen hair service changes, fetch that service's slot
+  // list (with live remaining-capacity counts if the database is set up).
+  const fetchSlots = useCallback(async (hairService) => {
+    if (!hairService) {
+      setSlots([]);
+      return;
+    }
+    setSlotsLoading(true);
+    try {
+      const res = await fetch(`/api/slots?hairService=${encodeURIComponent(hairService)}`);
+      const data = await res.json();
+      setSlots(data.slots || []);
+    } catch (err) {
+      setSlots([]);
+    } finally {
+      setSlotsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (needsHairService && form.hairService) {
+      fetchSlots(form.hairService);
+    } else {
+      setSlots([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form.hairService, needsHairService]);
 
   function validate() {
     const e = {};
@@ -56,6 +88,9 @@ export default function RegistrationForm() {
     if (!form.school.trim()) e.school = "Required";
     if (!form.registrationType) e.registrationType = "Please select a registration type";
     if (needsHairService && !form.hairService) e.hairService = "Please select one hair service";
+    if (needsHairService && form.hairService && !form.appointmentSlot) {
+      e.appointmentSlot = "Please choose an appointment time";
+    }
     if (!form.consentParent) e.consentParent = "Required";
     if (!form.consentLiability) e.consentLiability = "Required";
     if (!form.ackApptOnly) e.ackApptOnly = "Required";
@@ -63,6 +98,7 @@ export default function RegistrationForm() {
     if (!form.ackAccompanied) e.ackAccompanied = "Required";
     if (!form.ackWhileSuppliesLast) e.ackWhileSuppliesLast = "Required";
     if (!form.ackAccurate) e.ackAccurate = "Required";
+    if (needsHairService && !form.ackLatePolicy) e.ackLatePolicy = "Required";
     if (!form.photoRelease) e.photoRelease = "Please choose yes or no";
     return e;
   }
@@ -88,6 +124,7 @@ export default function RegistrationForm() {
         body: JSON.stringify({
           ...form,
           hairService: needsHairService ? form.hairService : null,
+          appointmentSlot: needsHairService ? form.appointmentSlot : null,
           backpackRequested: wantsBackpack
         })
       });
@@ -97,14 +134,21 @@ export default function RegistrationForm() {
       if (!res.ok) {
         setStatus("error");
         setServerError(data.message || "Something went wrong. Please try again or call 601-301-4144.");
+        // If the slot just filled, refresh availability so the picker reflects reality.
+        if (res.status === 409 && needsHairService) {
+          fetchSlots(form.hairService);
+        }
         return;
       }
+
+      const chosenSlot = slots.find((s) => s.id === form.appointmentSlot);
 
       setConfirmation({
         parentName: form.parentName,
         studentName: form.studentName,
         registrationType: REGISTRATION_TYPES.find((t) => t.value === form.registrationType)?.title,
         hairService: needsHairService ? form.hairService : null,
+        appointmentSlotLabel: chosenSlot ? chosenSlot.label : null,
         backpackRequested: wantsBackpack
       });
       setStatus("success");
@@ -119,6 +163,7 @@ export default function RegistrationForm() {
     setErrors({});
     setStatus("idle");
     setConfirmation(null);
+    setSlots([]);
   }
 
   if (status === "success" && confirmation) {
@@ -149,6 +194,12 @@ export default function RegistrationForm() {
               <dd>{confirmation.hairService}</dd>
             </>
           )}
+          {confirmation.appointmentSlotLabel && (
+            <>
+              <dt>Requested Appointment Time</dt>
+              <dd>{confirmation.appointmentSlotLabel} on Saturday, August 1, 2026</dd>
+            </>
+          )}
           <dt>Backpack &amp; Supplies</dt>
           <dd>{confirmation.backpackRequested ? "Yes — while supplies last" : "Not requested"}</dd>
         </dl>
@@ -156,6 +207,14 @@ export default function RegistrationForm() {
         <p className="hint">
           Questions in the meantime? Call CMAR at <strong>601-301-4144</strong>.
         </p>
+
+        {confirmation.appointmentSlotLabel && (
+          <p className="hint" style={{ marginTop: 8 }}>
+            Please arrive <strong>10–15 minutes early</strong>. Appointments are held for up to 10 minutes
+            past the scheduled start time — after that, the slot may be given to another family. If
+            anything about your appointment changes, CMAR will contact you directly.
+          </p>
+        )}
 
         <button type="button" className="btn btn-outline" onClick={resetForm} style={{ marginTop: 20 }}>
           Register Another Student
@@ -295,7 +354,11 @@ export default function RegistrationForm() {
                 name="registrationType"
                 value={t.value}
                 checked={form.registrationType === t.value}
-                onChange={(e) => update("registrationType", e.target.value)}
+                onChange={(e) => {
+                  update("registrationType", e.target.value);
+                  update("hairService", "");
+                  update("appointmentSlot", "");
+                }}
               />
               <span className="rc-title">{t.title}</span>
               <span className="rc-sub">{t.sub}</span>
@@ -317,13 +380,88 @@ export default function RegistrationForm() {
                     name="hairService"
                     value={service}
                     checked={form.hairService === service}
-                    onChange={(e) => update("hairService", e.target.value)}
+                    onChange={(e) => {
+                      update("hairService", e.target.value);
+                      update("appointmentSlot", "");
+                    }}
                   />
                   <span>{service}</span>
                 </label>
               ))}
             </div>
             {errors.hairService && <div className="error-text show">{errors.hairService}</div>}
+
+            {form.hairService && (
+              <div style={{ marginTop: 20 }}>
+                <label style={{ marginBottom: 6 }}>
+                  Choose an Appointment Time <span className="req">*</span>
+                </label>
+                <p className="hint" style={{ marginTop: -2, marginBottom: 12 }}>
+                  {form.hairService === "Haircut"
+                    ? "Haircuts are scheduled in 45-minute slots."
+                    : "Styling services are scheduled in 60-minute slots."}
+                </p>
+                {slotsLoading ? (
+                  <p className="hint">Loading available times…</p>
+                ) : (
+                  <div className="slots">
+                    {slots.map((slot) => {
+                      const isFull = slot.remaining !== null && slot.remaining <= 0;
+                      const isSelected = form.appointmentSlot === slot.id;
+                      return (
+                        <label
+                          key={slot.id}
+                          className={`slot ${isSelected ? "selected" : ""} ${isFull ? "full" : ""}`}
+                        >
+                          <input
+                            type="radio"
+                            name="appointmentSlot"
+                            value={slot.id}
+                            disabled={isFull}
+                            checked={isSelected}
+                            onChange={(e) => update("appointmentSlot", e.target.value)}
+                          />
+                          {slot.label}
+                          <span className="cap">
+                            {isFull
+                              ? "Full"
+                              : slot.remaining !== null
+                              ? `${slot.remaining} spot${slot.remaining === 1 ? "" : "s"} left`
+                              : "Limited availability"}
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+                {errors.appointmentSlot && <div className="error-text show">{errors.appointmentSlot}</div>}
+
+                {form.appointmentSlot && (
+                  <div className="late-policy-box">
+                    <p>
+                      <strong>Please arrive 10–15 minutes before your scheduled time.</strong> Appointments
+                      are held for up to 10 minutes past the start time — after that, the slot may be given
+                      to another family so we can serve as many children as possible. If anything about your
+                      appointment changes, a CMAR representative will contact you directly using the phone
+                      number or email you provided below.
+                    </p>
+                    <label className="consent-item" style={{ marginTop: 12 }}>
+                      <input
+                        type="checkbox"
+                        checked={form.ackLatePolicy}
+                        onChange={(e) => update("ackLatePolicy", e.target.checked)}
+                        data-error={Boolean(errors.ackLatePolicy)}
+                      />
+                      <p>
+                        I understand the 10-minute late policy and will do my best to arrive on time.{" "}
+                        <span className="req">*</span>
+                      </p>
+                    </label>
+                    {errors.ackLatePolicy && <div className="error-text show">This acknowledgement is required.</div>}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </fieldset>
