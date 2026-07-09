@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getSlotsForService, SLOT_CAPACITY } from "@/lib/slots";
+import { getSlotsForService, getPooledServices, getCapacityForService } from "@/lib/slots";
 import { getSupabaseClient } from "@/lib/supabase";
 
 export const runtime = "nodejs";
@@ -8,10 +8,15 @@ export const runtime = "nodejs";
  * GET /api/slots?hairService=Haircut
  *
  * Returns the slot list for the given hair service, each with how many
- * spots remain. If Supabase storage isn't configured (see .env.example),
- * there's no persistent record of who booked what, so `remaining` is
- * returned as null and the UI shows the slots without a live count rather
- * than guessing.
+ * spots remain. Capacity and remaining counts are POOLED across every
+ * service that shares the same staff (e.g. all 4 styling services share
+ * one pool of 3 stylist spots per slot — booking any one of them counts
+ * against the same total).
+ *
+ * If Supabase storage isn't configured (see .env.example), there's no
+ * persistent record of who booked what, so `remaining` is returned as
+ * null and the UI shows the slots without a live count rather than
+ * guessing.
  */
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -22,10 +27,13 @@ export async function GET(request) {
     return NextResponse.json({ slots: [] });
   }
 
+  const capacity = getCapacityForService(hairService);
+  const pooledServices = getPooledServices(hairService);
+
   const supabase = getSupabaseClient();
   if (!supabase) {
     return NextResponse.json({
-      slots: slots.map((s) => ({ ...s, remaining: null, capacity: SLOT_CAPACITY }))
+      slots: slots.map((s) => ({ ...s, remaining: null, capacity }))
     });
   }
 
@@ -33,7 +41,7 @@ export async function GET(request) {
     const { data, error } = await supabase
       .from("registrations")
       .select("appointment_slot")
-      .eq("hair_service", hairService);
+      .in("hair_service", pooledServices);
 
     if (error) throw error;
 
@@ -45,8 +53,8 @@ export async function GET(request) {
 
     const slotsWithCounts = slots.map((s) => ({
       ...s,
-      capacity: SLOT_CAPACITY,
-      remaining: Math.max(SLOT_CAPACITY - (counts[s.id] || 0), 0)
+      capacity,
+      remaining: Math.max(capacity - (counts[s.id] || 0), 0)
     }));
 
     return NextResponse.json({ slots: slotsWithCounts });
@@ -54,7 +62,7 @@ export async function GET(request) {
     console.error("Failed to fetch slot availability:", err);
     // Fail open with unknown counts rather than blocking the form entirely.
     return NextResponse.json({
-      slots: slots.map((s) => ({ ...s, remaining: null, capacity: SLOT_CAPACITY }))
+      slots: slots.map((s) => ({ ...s, remaining: null, capacity }))
     });
   }
 }

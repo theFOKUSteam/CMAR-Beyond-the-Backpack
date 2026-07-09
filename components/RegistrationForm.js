@@ -398,8 +398,8 @@ export default function RegistrationForm() {
                 </label>
                 <p className="hint" style={{ marginTop: -2, marginBottom: 12 }}>
                   {form.hairService === "Haircut"
-                    ? "Haircuts are scheduled in 45-minute slots."
-                    : "Styling services are scheduled in 60-minute slots."}
+                    ? "Haircuts are scheduled in 45-minute slots with 3 barbers working."
+                    : "Styling services are scheduled in 60-minute slots with 3 stylists working — spots are shared across all styling services in the same hour."}
                 </p>
                 {slotsLoading ? (
                   <p className="hint">Loading available times…</p>

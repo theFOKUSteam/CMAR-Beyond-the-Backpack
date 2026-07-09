@@ -170,14 +170,21 @@ in `public/images/`.
 
 ## 6.5 Appointment Time Slots
 
-Families who select a hair service now also pick a specific appointment time:
+Families who select a hair service now also pick a specific appointment time.
+Capacity is based on your **actual staff**, not an arbitrary number:
 
-- **Haircuts** are scheduled in **45-minute** slots (10:00, 10:45, 11:30, 12:15).
-- **Silk Press, Natural Updo, Kids Ponytail, and Kids Braided Styles** are
-  scheduled in **60-minute** slots (10:00, 11:00, 12:00), since styling
-  takes longer.
-- Each slot holds **10 families by default** — change the `SLOT_CAPACITY`
-  constant at the top of `lib/slots.js` to adjust this for every slot at once.
+- **Haircuts (3 barbers):** 45-minute slots (10:00, 10:45, 11:30, 12:15),
+  **3 people max per slot**.
+- **Silk Press, Natural Updo, Kids Ponytail, and Kids Braided Styles
+  (3 stylists):** 60-minute slots (10:00, 11:00, 12:00). These four
+  services **share one pool of 3 spots per slot** — since the same 3
+  stylists can perform any of them, booking a Silk Press counts against
+  the same hourly capacity as a Natural Updo. It's not 3 spots *per style
+  type*; it's 3 stylist-hours total, whichever styles families choose.
+
+To change staffing, edit `BARBER_COUNT` and `STYLIST_COUNT` at the top of
+`lib/slots.js` — every slot's capacity updates automatically, no other
+code changes needed.
 
 **Live remaining-spot counts require Supabase** (see section 5 above). Without
 it, the site still shows the slot times, but can't display or enforce a
