@@ -1,0 +1,26 @@
+{
+  "name": "beyond-the-backpack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Registration website for Beyond the Backpack, hosted by the Central Mississippi Association of Realtists (CMAR).",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "generate-qr": "node scripts/generate-qr.js"
+  },
+  "dependencies": {
+    "next": "14.2.35",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "resend": "^3.4.0",
+    "@supabase/supabase-js": "^2.45.0"
+  },
+  "devDependencies": {
+    "qrcode": "^1.5.3"
+  },
+  "engines": {
+    "node": ">=18.18.0"
+  }
+}

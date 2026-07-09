@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#F1EAD8"/>
+  <circle cx="200" cy="160" r="90" fill="#0B5E3C"/>
+  <circle cx="200" cy="140" r="50" fill="#F1EAD8"/>
+  <path d="M150 150c0-30 22-55 50-55s50 25 50 55" fill="none" stroke="#14201b" stroke-width="8" stroke-linecap="round"/>
+  <rect x="120" y="230" width="160" height="120" rx="24" fill="#1F3A5F"/>
+  <circle cx="290" cy="230" r="34" fill="#C9A227"/>
+  <path d="M275 230l10 10 20-20" fill="none" stroke="#14283f" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="200" y="386" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="16" font-weight="700" fill="#1F3A5F">HAIRCUTS &amp; STYLING</text>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#F1EAD8"/>
+  <circle cx="140" cy="150" r="50" fill="#1F3A5F"/>
+  <circle cx="260" cy="150" r="50" fill="#0B5E3C"/>
+  <path d="M90 260c10-40 40-60 50-60s40 20 50 60" fill="none" stroke="#1F3A5F" stroke-width="10" stroke-linecap="round"/>
+  <path d="M210 260c10-40 40-60 50-60s40 20 50 60" fill="none" stroke="#0B5E3C" stroke-width="10" stroke-linecap="round"/>
+  <path d="M170 320c10-16 20-24 30-24s20 8 30 24" fill="none" stroke="#C9A227" stroke-width="10" stroke-linecap="round"/>
+  <text x="200" y="386" text-anchor="middle" font-family="Montserrat, sans-serif" font-size="16" font-weight="700" fill="#1F3A5F">COMMUNITY &amp; SMILES</text>
+</svg>
